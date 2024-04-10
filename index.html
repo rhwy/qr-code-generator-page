@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>QR Code Generator</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+
+    <style>
+      .header {
+        background: url("img/banner.png") no-repeat center center;
+        background-size: cover;
+        color: white;
+        padding: 10px 0;
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-shadow: 4px 4px 8px rgba(0, 0, 0, 1);
+      }
+
+      /* Responsive font size using viewport width (vw) */
+      .header h1 {
+        font-size: 5vw; /* Responsive font size */
+        margin: 0; /* Removes default margin to help with vertical centering */
+        padding: 0; /* Adjust as needed */
+        /* Limit the size for very large or very small viewports */
+        max-font-size: 50px;
+        min-font-size: 22px;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
+      .form-group input,
+      .form-group select {
+        margin-bottom: 1.5rem; /* Increase space below inputs and select */
+      }
+      /* Ensure the right column has enough height to allow for vertical centering */
+      .qr-column {
+        min-height: 400px; /* Adjust based on your needs */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .footer {
+          background-color: #000; /* Black background */
+          color: #616161; /* Smoke grey font */
+          padding: 1rem 0; /* Adjust padding as needed */
+      }
+
+      .footer .containerf {
+          display: flex;
+          justify-content: center;
+          align-items: center; 
+      }
+      .footer a {
+          color: #AAA; 
+          margin-left: 15px; 
+          text-decoration: none; 
+      }
+
+      .footer a:hover {
+          color: #fff; 
+         text-decoration: underline;
+      }
+
+      
+      .footer i {
+          margin-right: 8px; /* Spacing between icon and text */
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="header"><h1>QR Code Generator</h1></div>
+    <div class="container py-5">
+      <div class="row">
+        <div class="col-md-6">
+          <form id="qrForm" class="form-group">
+            <label for="url">URL to Encode:</label>
+            <input
+              type="url"
+              id="url"
+              class="form-control"
+              placeholder="Enter URL"
+              required
+            />
+
+            <label for="color">Dots Color:</label>
+            <input
+              type="color"
+              id="color"
+              class="form-control"
+              value="#FFFFFF"
+            />
+
+            <label for="backgroundColor">Background Color:</label>
+            <input
+              type="color"
+              id="backgroundColor"
+              class="form-control"
+              value="#FF0000"
+            />
+
+            <label for="image">Center Image:</label>
+            <select id="image" class="form-control">
+              <option value="">-- none --</option>
+              <option value="img/scanmeblack.svg">scanmeblack.svg</option>
+              <option value="img/scanmewhite.svg">scanmewhite.svg</option>
+              <option value="img/flashmeblack.svg">flashmeblack.svg</option>
+              <option value="img/flashmewhite.svg">flashmewhite.svg</option>
+              <option value="img/bubble.jpg">bubble.jpg</option>
+            </select>
+
+            <label for="customName">Custom Download Name:</label>
+            <input
+              type="text"
+              id="customName"
+              class="form-control"
+              placeholder="qr_domain_com"
+            />
+
+            <button type="button" id="createBtn" class="btn btn-primary mt-3">
+              Create QR Code
+            </button>
+            <button type="button" id="downloadSvgBtn" class="btn btn-info mt-3">
+              Download SVG
+            </button>
+            <button
+              type="button"
+              id="downloadPngBtn"
+              class="btn btn-warning mt-3"
+            >
+              Download PNG
+            </button>
+            <button type="button" id="clearBtn" class="btn btn-secondary mt-3">
+              Clear
+            </button>
+          </form>
+        </div>
+        <div class="col-md-6 qr-column">
+          <div id="canvas"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer py-5">
+        <div class="containerf">
+          <span> © 2024 Rui Carvalho </span>
+          <span> <a href="https://twitter.com/rhwy" class="ml-2">
+              <i class="fab fa-twitter"></i> Twitter
+          </a>
+          <a href="https://ncrafts.io" class="ml-2">
+              <i class="fas fa-globe"></i> Website
+          </a>
+          <a href="https://www.linkedin.com/in/ruifr" class="ml-2">
+              <i class="fas fa-briefcase"></i> LinkedIn
+          </a></span>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+      const createBtn = document.getElementById("createBtn");
+      const downloadSvgBtn = document.getElementById("downloadSvgBtn");
+      const downloadPngBtn = document.getElementById("downloadPngBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const urlInput = document.getElementById("url");
+      const colorInput = document.getElementById("color");
+      const backgroundColorInput = document.getElementById("backgroundColor");
+      const imageSelect = document.getElementById("image");
+      const customNameInput = document.getElementById("customName");
+      const canvas = document.getElementById("canvas");
+
+      const qrCode = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        type: "svg",
+        data: "https://example.com",
+        cornersSquareOptions: { type: "square" }, //color,
+        dotsOptions: { color: colorInput.value, type: "square" },
+        backgroundOptions: { color: backgroundColorInput.value },
+        imageOptions: { crossOrigin: "anonymous", margin: 20 },
+        image: imageSelect.value,
+      });
+
+      qrCode.append(canvas); // Display default QR code on page load
+
+      const updateQRCode = () => {
+        qrCode.update({
+          data: urlInput.value,
+          dotsOptions: { color: colorInput.value },
+          backgroundOptions: { color: backgroundColorInput.value },
+          image: imageSelect.value,
+        });
+      };
+
+      createBtn.onclick = updateQRCode;
+
+      const getFileName = (url, extension) => {
+        if (customNameInput.value.trim() !== "") {
+          return `${customNameInput.value}.${extension}`;
+        }
+        const urlObj = new URL(url);
+        const domainName = urlObj.hostname.replace(/\./g, "_");
+        return `qr-${domainName}.${extension}`;
+      };
+
+      const downloadQR = (extension) => {
+        const fileName = getFileName(
+          urlInput.value || "example.com",
+          extension,
+        );
+        qrCode.download({ name: fileName, extension: extension });
+      };
+
+      downloadSvgBtn.onclick = () => downloadQR("svg");
+      downloadPngBtn.onclick = () => downloadQR("png");
+
+      clearBtn.onclick = () => {
+        urlInput.value = "";
+        colorInput.value = "#3A058A";
+        backgroundColorInput.value = "#ffffff";
+        imageSelect.selectedIndex = 0; // Reset to the first option
+        customNameInput.value = "";
+        canvas.innerHTML = ""; // Clear QR code display
+        updateQRCode(); // Re-update QR code to reset it to default
+      };
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const inputs = document.querySelectorAll(
+          "#qrForm input, #qrForm select",
+        );
+        inputs.forEach((input) => {
+          input.addEventListener("change", updateQRCode);
+        });
+      });
+    </script>
+  </body>
+</html>
